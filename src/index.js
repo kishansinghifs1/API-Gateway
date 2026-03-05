@@ -15,6 +15,7 @@ app.use(express.json());
 
 app.use(limiter);
 
+
 app.use('/flightsService',
   createProxyMiddleware({
     target:ServerConfig.FLIGHTS_SERVICE,

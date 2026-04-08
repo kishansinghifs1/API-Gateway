@@ -3,7 +3,6 @@ const { StatusCodes } = require("http-status-codes");
 const { ErrorResponse } = require("../utils/common");
 const AppError = require("../utils/errors/app-error");
 const { UserService } = require("../services");
-const { message } = require("../utils/common/error-response");
 
 function validateAuthRequest(req, res, next) {
   if (!req.body.email) {
@@ -14,6 +13,14 @@ function validateAuthRequest(req, res, next) {
   if (!req.body.password) {
     ErrorResponse.message = "Something went wrong while authentication user";
     ErrorResponse.error = new AppError(["password is not found in the incoming request body"],StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+  next();
+}
+function validateRefreshTokenRequest(req,res,next){
+  if (!req.body.refreshToken) {
+    ErrorResponse.message = "Something went wrong while refreshing token";
+    ErrorResponse.error = new AppError(["refreshToken is not found in the incoming request body"],StatusCodes.BAD_REQUEST);
     return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
   }
   next();
@@ -43,6 +50,7 @@ async function isAdmin(req,res,next){
 
 module.exports = {
     validateAuthRequest,
+  validateRefreshTokenRequest,
     checkAuth,
     isAdmin
 }

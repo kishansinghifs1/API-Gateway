@@ -19,7 +19,7 @@ async function signup(req, res){
         .json(SuccessResponse);
     } catch (error) {
         ErrorResponse.error = error;
-        return res.status(error.statusCode)
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
         .json(ErrorResponse);
     }
 }
@@ -35,7 +35,20 @@ async function signin(req, res){
         .json(SuccessResponse);
     } catch (error) {
         ErrorResponse.error = error;
-        return res.status(error.statusCode)
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ErrorResponse);
+    }
+}
+async function refreshToken(req, res){
+    try {
+        const tokens = await UserService.refreshToken(req.body.refreshToken);
+        SuccessResponse.data = tokens;
+        return res
+        .status(StatusCodes.OK)
+        .json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
         .json(ErrorResponse);
     }
 }
@@ -51,12 +64,13 @@ async function addRoletoUser(req, res){
         .json(SuccessResponse);
     } catch (error) {
         ErrorResponse.error = error;
-        return res.status(error.statusCode)
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
         .json(ErrorResponse);
     }
 }
 module.exports={
     signup,
     signin,
+    refreshToken,
     addRoletoUser
 }

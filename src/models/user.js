@@ -13,7 +13,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsToMany(models.Role,{through:'User_Roles',as:'role'});
+      this.belongsToMany(models.Role, {
+        through: 'User_Roles',
+        as: 'role',
+        foreignKey: 'userId',
+        otherKey: 'roleId'
+      });
     }
   }
   User.init({
@@ -29,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false,
       validate:{
-        len:[3,50]
+        len:[3,255]
       }
     }
   }, {

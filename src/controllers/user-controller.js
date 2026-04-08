@@ -68,9 +68,24 @@ async function addRoletoUser(req, res){
         .json(ErrorResponse);
     }
 }
+async function getSession(req, res){
+    try {
+        const userId = req.user;
+        const isAdmin = await UserService.isAdmin(userId);
+        SuccessResponse.data = { userId, isAdmin };
+        return res
+        .status(StatusCodes.OK)
+        .json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ErrorResponse);
+    }
+}
 module.exports={
     signup,
     signin,
     refreshToken,
-    addRoletoUser
+    addRoletoUser,
+    getSession
 }

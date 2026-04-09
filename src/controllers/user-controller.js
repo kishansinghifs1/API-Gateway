@@ -10,6 +10,8 @@ request body -> {email:'Shruti12@gmail.com',password:'1234'}
 async function signup(req, res){
     try {
         const user = await UserService.create({
+            firstName:req.body.firstName,
+            lastName:req.body.lastName,
             email:req.body.email,
             password:req.body.password
         });
@@ -71,8 +73,9 @@ async function addRoletoUser(req, res){
 async function getSession(req, res){
     try {
         const userId = req.user;
+        const user = await UserService.getUser(userId);
         const isAdmin = await UserService.isAdmin(userId);
-        SuccessResponse.data = { userId, isAdmin };
+        SuccessResponse.data = { ...user, isAdmin };
         return res
         .status(StatusCodes.OK)
         .json(SuccessResponse);
@@ -82,10 +85,26 @@ async function getSession(req, res){
         .json(ErrorResponse);
     }
 }
+
+async function getUser(req, res){
+    try {
+        const user = await UserService.getUser(req.params.id);
+        SuccessResponse.data = user;
+        return res
+        .status(StatusCodes.OK)
+        .json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ErrorResponse);
+    }
+}
+
 module.exports={
     signup,
     signin,
     refreshToken,
     addRoletoUser,
-    getSession
+    getSession,
+    getUser
 }

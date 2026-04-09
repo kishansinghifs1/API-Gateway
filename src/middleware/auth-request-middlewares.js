@@ -17,6 +17,23 @@ function validateAuthRequest(req, res, next) {
   }
   next();
 }
+
+function validateSignupRequest(req, res, next) {
+  if (!req.body.firstName) {
+    ErrorResponse.message = 'Something went wrong while creating user';
+    ErrorResponse.error = new AppError(['firstName is not found in the incoming request body'], StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  if (!req.body.lastName) {
+    ErrorResponse.message = 'Something went wrong while creating user';
+    ErrorResponse.error = new AppError(['lastName is not found in the incoming request body'], StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  return validateAuthRequest(req, res, next);
+}
+
 function validateRefreshTokenRequest(req,res,next){
   if (!req.body.refreshToken) {
     ErrorResponse.message = "Something went wrong while refreshing token";
@@ -50,6 +67,7 @@ async function isAdmin(req,res,next){
 
 module.exports = {
     validateAuthRequest,
+  validateSignupRequest,
   validateRefreshTokenRequest,
     checkAuth,
     isAdmin

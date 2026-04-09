@@ -5,12 +5,33 @@ const { StatusCodes } = require('http-status-codes');
 const userRepo =new UserRepository();
 const roleRepo =new RoleRepository();
 
+function normalizeNamePart(value, fallback) {
+    if (typeof value !== 'string') return fallback;
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : fallback;
+}
+
+function formatUserProfile(user) {
+    return {
+        userId: user.id,
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: `${user.firstName} ${user.lastName}`.trim(),
+        email: user.email
+    };
+}
+
 async function create(data){
 try {
-        const user = await userRepo.create(data);
+        const user = await userRepo.create({
+            ...data,
+            firstName: normalizeNamePart(data.firstName, 'User'),
+            lastName: normalizeNamePart(data.lastName, 'Name')
+        });
         const role=await roleRepo.getRoleByName(Enums.USER_ROLES_ENUMS.CUSTOMER);
     await user.addRole(role);
-        return user;
+        return formatUserProfile(user);
     } catch (error) {
         if(error.name == 'SequelizeValidationError'||error.name == 'SequelizeUniqueConstraintError'){
             let explanation = [];
@@ -38,7 +59,8 @@ async function signin(data){
        const refreshToken=Auth.createRefreshToken({id:user.id,email:user.email});
        return {
         accessToken,
-        refreshToken
+        refreshToken,
+        user: formatUserProfile(user)
        };
 
     } catch (error) {
@@ -134,6 +156,19 @@ async function isAdmin(id){
     }
 }
 
+async function getUser(id){
+    try {
+        const user = await userRepo.get(id);
+        if(!user){
+            throw new AppError('No user found for the given id',StatusCodes.NOT_FOUND);
+        }
+        return formatUserProfile(user);
+    } catch (error) {
+        if(error instanceof AppError) throw error;
+        console.log(error);
+        throw new AppError('Something went wrong',StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
 
 module.exports={
     create,
@@ -141,5 +176,6 @@ module.exports={
     isAuthenticated,
     refreshToken,
     addRoletoUser,
-    isAdmin
+    isAdmin,
+    getUser
 }
